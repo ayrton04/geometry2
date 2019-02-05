@@ -39,9 +39,15 @@
 #include <geometry_msgs/QuaternionStamped.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/Accel.h>
+#include <geometry_msgs/AccelStamped.h>
+#include <geometry_msgs/AccelWithCovarianceStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <geometry_msgs/Wrench.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <kdl/frames.hpp>
@@ -810,6 +816,78 @@ void doTransform(const geometry_msgs::PoseStamped& t_in, geometry_msgs::PoseStam
   t_out.header.frame_id = transform.header.frame_id;
 }
 
+/** \brief Apply a geometry_msgs TransformStamped to a geometry_msgs Twist type.
+* This function is a specialization of the doTransform template defined in tf2/convert.h.
+* \param t_in The twist to transform, as a Twist message.
+* \param t_out The transformed twist, as a Twist message.
+* \param transform The timestamped transform to apply, as a TransformStamped message.
+*/
+template <>
+inline
+void doTransform(const geometry_msgs::Twist& t_in, geometry_msgs::Twist& t_out, const geometry_msgs::TransformStamped& transform)
+{
+  tf2::Vector3 vl;
+  fromMsg(t_in.linear, vl);
+  tf2::Vector3 va;
+  fromMsg(t_in.angular, va);
+
+  tf2::Transform t;
+  fromMsg(transform.transform, t);
+  t_out.linear = tf2::toMsg(t.getBasis() * vl);
+  t_out.angular = tf2::toMsg(t.getBasis() * va);
+}
+
+/** \brief Apply a geometry_msgs TransformStamped to a stamped geometry_msgs Twist type.
+* This function is a specialization of the doTransform template defined in tf2/convert.h.
+* \param t_in The twist to transform, as a timestamped Twist message.
+* \param t_out The transformed twist, as a timestamped Twist message.
+* \param transform The timestamped transform to apply, as a TransformStamped message.
+*/
+template <>
+inline
+void doTransform(const geometry_msgs::TwistStamped& t_in, geometry_msgs::TwistStamped& t_out, const geometry_msgs::TransformStamped& transform)
+{
+  doTransform(t_in.twist, t_out.twist, transform);
+  t_out.header.stamp = transform.header.stamp;
+  t_out.header.frame_id = transform.header.frame_id;
+}
+
+/** \brief Apply a geometry_msgs TransformStamped to a geometry_msgs Accel type.
+* This function is a specialization of the doTransform template defined in tf2/convert.h.
+* \param t_in The acceleration to transform, as an Accel message.
+* \param t_out The transformed acceleration, as an Accel message.
+* \param transform The timestamped transform to apply, as a TransformStamped message.
+*/
+template <>
+inline
+void doTransform(const geometry_msgs::Accel& t_in, geometry_msgs::Accel& t_out, const geometry_msgs::TransformStamped& transform)
+{
+  tf2::Vector3 al;
+  fromMsg(t_in.linear, al);
+  tf2::Vector3 aa;
+  fromMsg(t_in.angular, aa);
+
+  tf2::Transform t;
+  fromMsg(transform.transform, t);
+  t_out.linear = tf2::toMsg(t.getBasis() * al);
+  t_out.angular = tf2::toMsg(t.getBasis() * aa);
+}
+
+/** \brief Apply a geometry_msgs TransformStamped to an stamped geometry_msgs Accel type.
+* This function is a specialization of the doTransform template defined in tf2/convert.h.
+* \param t_in The acceleration to transform, as a timestamped Accel message.
+* \param t_out The transformed acceleration, as a timestamped Accel message.
+* \param transform The timestamped transform to apply, as a TransformStamped message.
+*/
+template <>
+inline
+void doTransform(const geometry_msgs::AccelStamped& t_in, geometry_msgs::AccelStamped& t_out, const geometry_msgs::TransformStamped& transform)
+{
+  doTransform(t_in.accel, t_out.accel, transform);
+  t_out.header.stamp = transform.header.stamp;
+  t_out.header.frame_id = transform.header.frame_id;
+}
+
 /** \brief Transform the covariance matrix of a PoseWithCovarianceStamped message to a new frame.
 * \param t_in The covariance matrix to transform.
 * \param transform The timestamped transform to apply, as a TransformStamped message.
@@ -921,6 +999,56 @@ void doTransform(const geometry_msgs::PoseWithCovarianceStamped& t_in, geometry_
   t_out.header.frame_id = transform.header.frame_id;
 
   t_out.pose.covariance = transformCovariance(t_in.pose.covariance, t);
+}
+
+/** \brief Apply a geometry_msgs TransformStamped to a geometry_msgs TwistWithCovarianceStamped type.
+* This function is a specialization of the doTransform template defined in tf2/convert.h.
+* \param t_in The twist to transform, as a timestamped TwistWithCovarianceStamped message.
+* \param t_out The transformed twist, as a timestamped TwistWithCovarianceStamped message.
+* \param transform The timestamped transform to apply, as a TransformStamped message.
+*/
+template <>
+inline
+void doTransform(const geometry_msgs::TwistWithCovarianceStamped& t_in, geometry_msgs::TwistWithCovarianceStamped& t_out, const geometry_msgs::TransformStamped& transform)
+{
+  tf2::Vector3 vl;
+  fromMsg(t_in.twist.twist.linear, vl);
+  tf2::Vector3 va;
+  fromMsg(t_in.twist.twist.angular, va);
+
+  tf2::Transform t;
+  fromMsg(transform.transform, t);
+  t_out.twist.twist.linear = tf2::toMsg(t.getBasis() * vl);
+  t_out.twist.twist.angular = tf2::toMsg(t.getBasis() * va);
+  t_out.header.stamp = transform.header.stamp;
+  t_out.header.frame_id = transform.header.frame_id;
+
+  t_out.twist.covariance = transformCovariance(t_in.twist.covariance, t);
+}
+
+/** \brief Apply a geometry_msgs TransformStamped to a geometry_msgs AccelWithCovarianceStamped type.
+* This function is a specialization of the doTransform template defined in tf2/convert.h.
+* \param t_in The acceleration to transform, as a timestamped AccelWithCovarianceStamped message.
+* \param t_out The transformed acceleration, as a timestamped AccelWithCovarianceStamped message.
+* \param transform The timestamped transform to apply, as a TransformStamped message.
+*/
+template <>
+inline
+void doTransform(const geometry_msgs::AccelWithCovarianceStamped& t_in, geometry_msgs::AccelWithCovarianceStamped& t_out, const geometry_msgs::TransformStamped& transform)
+{
+  tf2::Vector3 al;
+  fromMsg(t_in.accel.accel.linear, al);
+  tf2::Vector3 aa;
+  fromMsg(t_in.accel.accel.angular, aa);
+
+  tf2::Transform t;
+  fromMsg(transform.transform, t);
+  t_out.accel.accel.linear = tf2::toMsg(t.getBasis() * al);
+  t_out.accel.accel.angular = tf2::toMsg(t.getBasis() * aa);
+  t_out.header.stamp = transform.header.stamp;
+  t_out.header.frame_id = transform.header.frame_id;
+
+  t_out.accel.covariance = transformCovariance(t_in.accel.covariance, t);
 }
 
 /** \brief Apply a geometry_msgs TransformStamped to an geometry_msgs Transform type.

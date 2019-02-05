@@ -351,6 +351,192 @@ TEST(TfGeometry, doTransformWrench)
  EXPECT_NEAR(res.torque.z, 3, EPS);
 }
 
+TEST(TfGeometry, doTransformTwist)
+{
+  geometry_msgs::Twist v1, res;
+  v1.linear.x = 2;
+  v1.linear.y = 1;
+  v1.linear.z = 3;
+  v1.angular.x = 2;
+  v1.angular.y = 1;
+  v1.angular.z = 3;
+
+  geometry_msgs::TransformStamped trafo;
+  trafo.transform.rotation = tf2::toMsg(tf2::Quaternion(tf2::Vector3(0,0,1), -M_PI / 2.0));
+
+  tf2::doTransform(v1, res, trafo);
+
+  EXPECT_NEAR(res.linear.x, 1, EPS);
+  EXPECT_NEAR(res.linear.y, -2, EPS);
+  EXPECT_NEAR(res.linear.z, 3, EPS);
+  EXPECT_NEAR(res.angular.x, 1, EPS);
+  EXPECT_NEAR(res.angular.y, -2, EPS);
+  EXPECT_NEAR(res.angular.z, 3, EPS);
+}
+
+TEST(TfGeometry, doTransformTwistStamped)
+{
+  geometry_msgs::TwistStamped v1, res;
+  v1.twist.linear.x = 2;
+  v1.twist.linear.y = 1;
+  v1.twist.linear.z = 3;
+  v1.twist.angular.x = 2;
+  v1.twist.angular.y = 1;
+  v1.twist.angular.z = 3;
+
+  geometry_msgs::TransformStamped trafo;
+  trafo.transform.rotation = tf2::toMsg(tf2::Quaternion(tf2::Vector3(0,0,1), -M_PI / 2.0));
+
+  tf2::doTransform(v1, res, trafo);
+
+  EXPECT_NEAR(res.twist.linear.x, 1, EPS);
+  EXPECT_NEAR(res.twist.linear.y, -2, EPS);
+  EXPECT_NEAR(res.twist.linear.z, 3, EPS);
+  EXPECT_NEAR(res.twist.angular.x, 1, EPS);
+  EXPECT_NEAR(res.twist.angular.y, -2, EPS);
+  EXPECT_NEAR(res.twist.angular.z, 3, EPS);
+}
+
+TEST(TfGeometry, doTransformTwistWithCovarianceStamped)
+{
+  geometry_msgs::TwistWithCovarianceStamped v1, res;
+  v1.twist.twist.linear.x = 2;
+  v1.twist.twist.linear.y = 1;
+  v1.twist.twist.linear.z = 3;
+  v1.twist.twist.angular.x = 2;
+  v1.twist.twist.angular.y = 1;
+  v1.twist.twist.angular.z = 3;
+
+  v1.twist.covariance[0] = 1;
+  v1.twist.covariance[7] = 1;
+  v1.twist.covariance[14] = 1;
+  v1.twist.covariance[21] = 1;
+  v1.twist.covariance[28] = 1;
+  v1.twist.covariance[35] = 1;
+
+  v1.twist.covariance[1] = 1;
+  v1.twist.covariance[6] = 1;
+  v1.twist.covariance[12] = 1;
+
+  geometry_msgs::TransformStamped trafo;
+  trafo.transform.rotation = tf2::toMsg(tf2::Quaternion(tf2::Vector3(0,0,1), -M_PI / 2.0));
+
+  tf2::doTransform(v1, res, trafo);
+
+  EXPECT_NEAR(res.twist.twist.linear.x, 1, EPS);
+  EXPECT_NEAR(res.twist.twist.linear.y, -2, EPS);
+  EXPECT_NEAR(res.twist.twist.linear.z, 3, EPS);
+  EXPECT_NEAR(res.twist.twist.angular.x, 1, EPS);
+  EXPECT_NEAR(res.twist.twist.angular.y, -2, EPS);
+  EXPECT_NEAR(res.twist.twist.angular.z, 3, EPS);
+
+  EXPECT_NEAR(res.twist.covariance[0], 1.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[1], -1.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[2], 0.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[6], -1.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[7], 1.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[8], 0.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[12], 0.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[13], -1.0, EPS);
+  EXPECT_NEAR(res.twist.covariance[14], 1.0, EPS);
+}
+
+TEST(TfGeometry, doTransformAccel)
+{
+  geometry_msgs::Accel v1, res;
+  v1.linear.x = 2;
+  v1.linear.y = 1;
+  v1.linear.z = 3;
+  v1.angular.x = 2;
+  v1.angular.y = 1;
+  v1.angular.z = 3;
+
+  geometry_msgs::TransformStamped trafo;
+  trafo.transform.translation.x = -1;
+  trafo.transform.translation.y = 2;
+  trafo.transform.translation.z = -3;
+  trafo.transform.rotation = tf2::toMsg(tf2::Quaternion(tf2::Vector3(0,0,1), -M_PI / 2.0));
+
+  tf2::doTransform(v1, res, trafo);
+
+  EXPECT_NEAR(res.linear.x, 1, EPS);
+  EXPECT_NEAR(res.linear.y, -2, EPS);
+  EXPECT_NEAR(res.linear.z, 3, EPS);
+  EXPECT_NEAR(res.angular.x, 1, EPS);
+  EXPECT_NEAR(res.angular.y, -2, EPS);
+  EXPECT_NEAR(res.angular.z, 3, EPS);
+}
+
+TEST(TfGeometry, doTransformAccelStamped)
+{
+  geometry_msgs::AccelStamped v1, res;
+  v1.accel.linear.x = 2;
+  v1.accel.linear.y = 1;
+  v1.accel.linear.z = 3;
+  v1.accel.angular.x = 2;
+  v1.accel.angular.y = 1;
+  v1.accel.angular.z = 3;
+
+  geometry_msgs::TransformStamped trafo;
+  trafo.transform.translation.x = -1;
+  trafo.transform.translation.y = 2;
+  trafo.transform.translation.z = -3;
+  trafo.transform.rotation = tf2::toMsg(tf2::Quaternion(tf2::Vector3(0,0,1), -M_PI / 2.0));
+
+  tf2::doTransform(v1, res, trafo);
+
+  EXPECT_NEAR(res.accel.linear.x, 1, EPS);
+  EXPECT_NEAR(res.accel.linear.y, -2, EPS);
+  EXPECT_NEAR(res.accel.linear.z, 3, EPS);
+  EXPECT_NEAR(res.accel.angular.x, 1, EPS);
+  EXPECT_NEAR(res.accel.angular.y, -2, EPS);
+  EXPECT_NEAR(res.accel.angular.z, 3, EPS);
+}
+
+TEST(TfGeometry, doTransformAccelWithCovarianceStamped)
+{
+  geometry_msgs::AccelWithCovarianceStamped v1, res;
+  v1.accel.accel.linear.x = 2;
+  v1.accel.accel.linear.y = 1;
+  v1.accel.accel.linear.z = 3;
+  v1.accel.accel.angular.x = 2;
+  v1.accel.accel.angular.y = 1;
+  v1.accel.accel.angular.z = 3;
+
+  v1.accel.covariance[0] = 1;
+  v1.accel.covariance[7] = 1;
+  v1.accel.covariance[14] = 1;
+  v1.accel.covariance[21] = 1;
+  v1.accel.covariance[28] = 1;
+  v1.accel.covariance[35] = 1;
+
+  v1.accel.covariance[1] = 1;
+  v1.accel.covariance[6] = 1;
+  v1.accel.covariance[12] = 1;
+
+  geometry_msgs::TransformStamped trafo;
+  trafo.transform.rotation = tf2::toMsg(tf2::Quaternion(tf2::Vector3(0,0,1), -M_PI / 2.0));
+
+  tf2::doTransform(v1, res, trafo);
+
+  EXPECT_NEAR(res.accel.accel.linear.x, 1, EPS);
+  EXPECT_NEAR(res.accel.accel.linear.y, -2, EPS);
+  EXPECT_NEAR(res.accel.accel.linear.z, 3, EPS);
+  EXPECT_NEAR(res.accel.accel.angular.x, 1, EPS);
+  EXPECT_NEAR(res.accel.accel.angular.y, -2, EPS);
+  EXPECT_NEAR(res.accel.accel.angular.z, 3, EPS);
+
+  EXPECT_NEAR(res.accel.covariance[0], 1.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[1], -1.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[2], 0.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[6], -1.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[7], 1.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[8], 0.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[12], 0.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[13], -1.0, EPS);
+  EXPECT_NEAR(res.accel.covariance[14], 1.0, EPS);
+}
+
 int main(int argc, char **argv){
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "test");
